@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10263b">
+  <meta name="description" content="Minha Central — seus aplicativos pessoais em um só lugar.">
+  <title>Minha Central</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="#" aria-label="Minha Central - início"><span class="brand-mark">✦</span><span><strong>Minha Central</strong><small>Seu espaço digital</small></span></a>
+    <nav class="main-nav" aria-label="Menu principal">
+      <button class="nav-item active" data-view="home"><span>⌂</span> Início</button>
+      <button class="nav-item" data-view="manage"><span>▦</span> Gerenciar aplicativos</button>
+      <button class="nav-item" data-view="settings"><span>⚙</span> Configurações</button>
+    </nav>
+    <div class="sidebar-bottom"><div class="profile-dot">W</div><div><strong>Bem-vindo!</strong><small>Versão inicial</small></div></div>
+  </aside>
+  <main class="main-content">
+    <header class="topbar">
+      <button class="mobile-menu" id="mobileMenu" aria-label="Abrir menu">☰</button>
+      <div class="breadcrumb">Espaço pessoal <span>/</span> <strong id="pageLabel">Início</strong></div>
+      <div class="top-actions"><span class="status-dot"></span><span>Minha Central</span></div>
+    </header>
+    <section class="view active" id="homeView">
+      <div class="hero">
+        <div class="hero-copy"><span class="eyebrow">SEU DIA, MAIS ORGANIZADO</span><h1>Tudo o que importa,<br><em>em um só lugar.</em></h1><p>Acesse seus aplicativos pessoais com praticidade e mantenha sua rotina organizada.</p><button class="primary-button" id="heroManage">Organizar meus aplicativos <span>→</span></button></div>
+        <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="glass-card glass-card-back">✧</div><div class="glass-card glass-card-front"><span class="sparkle">✦</span><strong>Seu espaço.</strong><small>Do seu jeito.</small></div><span class="floating-star star-one">✦</span><span class="floating-star star-two">✧</span></div>
+      </div>
+      <div class="section-heading"><div><span class="eyebrow">ACESSO RÁPIDO</span><h2>Meus aplicativos</h2><p>Selecione um aplicativo para continuar.</p></div><button class="secondary-button" id="addAppTop">＋ Adicionar aplicativo</button></div>
+      <div class="app-grid" id="appGrid" aria-live="polite"></div>
+      <div class="empty-state hidden" id="emptyState"><div class="empty-icon">▦</div><h3>Sua central começa aqui</h3><p>Cadastre seus aplicativos para que eles apareçam neste espaço.</p><button class="primary-button" id="emptyAdd">Adicionar primeiro aplicativo <span>→</span></button></div>
+      <footer class="page-footer"><span>MINHA CENTRAL</span><span>Organização, equilíbrio e praticidade.</span></footer>
+    </section>
+    <section class="view" id="manageView">
+      <div class="page-intro"><span class="eyebrow">PERSONALIZE SEU ESPAÇO</span><h1>Gerenciar aplicativos</h1><p>Adicione, edite e organize os atalhos exibidos na sua central.</p></div>
+      <div class="management-panel"><div class="panel-header"><div><h2>Seus atalhos</h2><p id="appCount">0 aplicativos cadastrados</p></div><button class="primary-button" id="addAppManage">＋ Novo aplicativo</button></div>
+        <div class="table-wrap"><table><thead><tr><th>Aplicativo</th><th>Endereço</th><th>Status</th><th>Ações</th></tr></thead><tbody id="appTable"></tbody></table></div>
+        <p class="privacy-note"><span>ⓘ</span> Nesta versão inicial, os cadastros ficam salvos neste navegador. Na próxima etapa, configuraremos o Supabase para autenticação e sincronização em nuvem.</p>
+      </div>
+    </section>
+    <section class="view" id="settingsView">
+      <div class="page-intro"><span class="eyebrow">PREFERÊNCIAS</span><h1>Configurações</h1><p>Prepare sua central para as próximas funcionalidades.</p></div>
+      <div class="settings-card"><div class="settings-symbol">✦</div><div><h2>Minha Central Premium</h2><p>Esta é a primeira versão funcional da interface. A autenticação, a sincronização em nuvem e as preferências de conta serão habilitadas nas próximas etapas.</p><span class="coming-soon">PRÓXIMA ETAPA: SUPABASE AUTH</span></div></div>
+    </section>
+  </main>
+</div>
+<div class="modal-backdrop hidden" id="appModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <form class="modal" id="appForm"><div class="modal-heading"><div><span class="eyebrow">SUA COLEÇÃO</span><h2 id="modalTitle">Adicionar aplicativo</h2></div><button type="button" class="close-button" id="closeModal" aria-label="Fechar">×</button></div>
+    <input type="hidden" id="appId">
+    <label for="appName">Nome do aplicativo <span>*</span></label><input id="appName" name="name" required maxlength="60" placeholder="Ex.: Nutri-Bio">
+    <label for="appDescription">Descrição</label><textarea id="appDescription" name="description" rows="2" maxlength="180" placeholder="Para que serve este aplicativo?"></textarea>
+    <label for="appUrl">Link do aplicativo <span>*</span></label><input id="appUrl" name="url" type="url" required placeholder="https://...">
+    <div class="form-row"><div><label for="appIcon">Ícone</label><select id="appIcon" name="icon"><option value="🥗">🥗 Alimentação</option><option value="💊">💊 Saúde</option><option value="📚">📚 Estudos</option><option value="💰">💰 Finanças</option><option value="🧰">🧰 Ferramentas</option><option value="⭐">⭐ Geral</option></select></div><div><label for="appColor">Cor do cartão</label><select id="appColor" name="color"><option value="green">Verde</option><option value="blue">Azul</option><option value="purple">Roxo</option><option value="gold">Dourado</option><option value="rose">Rosé</option></select></div></div>
+    <label class="checkbox-label"><input type="checkbox" id="appActive" checked> Exibir na tela inicial</label>
+    <div class="modal-actions"><button type="button" class="secondary-button" id="cancelModal">Cancelar</button><button type="submit" class="primary-button">Salvar aplicativo <span>→</span></button></div><p class="form-error hidden" id="formError" role="alert"></p>
+  </form>
+</div>
+<div class="toast hidden" id="toast" role="status"></div>
+</body></html>
