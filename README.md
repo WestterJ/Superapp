@@ -1,31 +1,23 @@
-# Minha Central
+# Minha Central Premium
 
-Portal pessoal de acesso a aplicativos, com visual Premium e layout responsivo.
-
-## Versão atual
-
-- Tela inicial com cartões dos aplicativos.
-- Cadastro, edição, ativação/desativação e exclusão de atalhos.
-- Validação de URL e abertura dos links em nova aba.
-- Persistência local usando `localStorage`.
-- Interface adaptável a celulares e computadores.
+Aplicação estática para GitHub Pages, com autenticação Supabase e cadastro de atalhos sincronizado na tabela `public.central_apps`.
 
 ## Arquivos
+- `index.html`: interface e formulário de autenticação.
+- `style.css`: identidade visual responsiva.
+- `app.js`: login/cadastro Supabase, leitura e gravação dos atalhos.
+- `.nojekyll`: desativa processamento Jekyll no GitHub Pages.
 
-- `index.html`: estrutura das telas.
-- `style.css`: identidade visual e responsividade.
-- `app.js`: cadastro e gerenciamento dos aplicativos.
+## Configuração Supabase
+O `app.js` contém o Project URL e a chave pública publishable. É apropriado usar uma chave pública no navegador desde que as políticas RLS estejam habilitadas e corretamente configuradas. Nunca colocar uma `service_role` ou secret key no frontend.
 
-## Como testar
+A tabela esperada é `public.central_apps`, com `id`, `user_id`, `name`, `description`, `url`, `icon`, `color`, `active` e `created_at`. A tabela deve ter RLS habilitado e políticas para que usuários autenticados leiam, insiram, atualizem e excluam apenas registros com `user_id = auth.uid()`.
 
-Abra `index.html` em um navegador ou publique os três arquivos em uma hospedagem estática.
+## Publicação
+Envie os cinco arquivos diretamente à raiz do repositório GitHub Pages, substituindo os arquivos anteriores. Depois aguarde a publicação e atualize a página. Ao criar uma conta, o Supabase pode exigir confirmação por e-mail, dependendo das configurações de Auth do projeto.
 
-Os três aplicativos iniciais são modelos. Acesse **Gerenciar aplicativos**, edite cada um e informe seu endereço publicado.
-
-## Próxima etapa: Supabase
-
-A autenticação e a persistência em nuvem ainda não estão habilitadas nesta versão. Antes de adicionar credenciais, criaremos o projeto Supabase e configuraremos autenticação, tabelas e políticas RLS. Não coloque chaves secretas no código do navegador.
-
-## Observação sobre armazenamento
-
-Nesta versão, os cadastros ficam no armazenamento local do navegador e não são sincronizados entre dispositivos. A limpeza dos dados do navegador pode removê-los; por isso, essa versão serve como protótipo funcional antes da integração com Supabase.
+## Observações
+- O projeto Supabase é compartilhado com outros aplicativos, mas os registros desta aplicação ficam na tabela separada `central_apps`.
+- Os links dos aplicativos são salvos na nuvem por usuário autenticado.
+- O login é independente dos logins dos outros aplicativos; não há SSO nesta versão.
+- Se já havia atalhos guardados no mesmo navegador, os links locais válidos podem ser migrados para a conta na primeira carga se a tabela ainda estiver vazia.

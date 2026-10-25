@@ -7,10 +7,23 @@
   <meta name="description" content="Minha Central — seus aplicativos pessoais em um só lugar.">
   <title>Minha Central</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js" defer></script>
 </head>
 <body>
-<div class="app-shell">
+<div class="auth-screen" id="authScreen">
+  <form class="auth-card" id="authForm">
+    <div class="auth-brand"><span class="brand-mark">✦</span><div><strong>Minha Central</strong><small>Seu espaço digital</small></div></div>
+    <span class="eyebrow">ACESSO SEGURO</span><h1 id="authTitle">Entre na sua central</h1>
+    <p id="authDescription">Use seu e-mail e senha para sincronizar seus aplicativos na nuvem.</p>
+    <label for="authEmail">E-mail</label><input id="authEmail" type="email" autocomplete="email" required placeholder="voce@exemplo.com">
+    <label for="authPassword">Senha</label><input id="authPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="Mínimo de 6 caracteres">
+    <button class="primary-button auth-submit" id="authSubmit" type="submit">Entrar <span>→</span></button>
+    <button class="auth-switch" id="authSwitch" type="button">Ainda não tem conta? Criar cadastro</button>
+    <p class="auth-message" id="authMessage" role="status"></p>
+  </form>
+</div>
+<div class="app-shell" id="appShell">
   <aside class="sidebar" id="sidebar">
     <a class="brand" href="#" aria-label="Minha Central - início"><span class="brand-mark">✦</span><span><strong>Minha Central</strong><small>Seu espaço digital</small></span></a>
     <nav class="main-nav" aria-label="Menu principal">
@@ -18,7 +31,7 @@
       <button class="nav-item" data-view="manage"><span>▦</span> Gerenciar aplicativos</button>
       <button class="nav-item" data-view="settings"><span>⚙</span> Configurações</button>
     </nav>
-    <div class="sidebar-bottom"><div class="profile-dot">W</div><div><strong>Bem-vindo!</strong><small>Versão inicial</small></div></div>
+    <div class="sidebar-bottom"><div class="profile-dot">✦</div><div class="profile-copy"><strong id="profileEmail">Conta conectada</strong><small>Sincronização na nuvem</small></div><button class="signout-button" id="signOut" type="button">Sair</button></div>
   </aside>
   <main class="main-content">
     <header class="topbar">
@@ -40,12 +53,12 @@
       <div class="page-intro"><span class="eyebrow">PERSONALIZE SEU ESPAÇO</span><h1>Gerenciar aplicativos</h1><p>Adicione, edite e organize os atalhos exibidos na sua central.</p></div>
       <div class="management-panel"><div class="panel-header"><div><h2>Seus atalhos</h2><p id="appCount">0 aplicativos cadastrados</p></div><button class="primary-button" id="addAppManage">＋ Novo aplicativo</button></div>
         <div class="table-wrap"><table><thead><tr><th>Aplicativo</th><th>Endereço</th><th>Status</th><th>Ações</th></tr></thead><tbody id="appTable"></tbody></table></div>
-        <p class="privacy-note"><span>ⓘ</span> Nesta versão inicial, os cadastros ficam salvos neste navegador. Na próxima etapa, configuraremos o Supabase para autenticação e sincronização em nuvem.</p>
+        <p class="privacy-note"><span>ⓘ</span> Seus cadastros são armazenados no Supabase e sincronizados entre dispositivos após entrar na sua conta.</p>
       </div>
     </section>
     <section class="view" id="settingsView">
       <div class="page-intro"><span class="eyebrow">PREFERÊNCIAS</span><h1>Configurações</h1><p>Prepare sua central para as próximas funcionalidades.</p></div>
-      <div class="settings-card"><div class="settings-symbol">✦</div><div><h2>Minha Central Premium</h2><p>Esta é a primeira versão funcional da interface. A autenticação, a sincronização em nuvem e as preferências de conta serão habilitadas nas próximas etapas.</p><span class="coming-soon">PRÓXIMA ETAPA: SUPABASE AUTH</span></div></div>
+      <div class="settings-card"><div class="settings-symbol">✦</div><div><h2>Minha Central Premium</h2><p>Sua conta usa o Supabase Auth e os atalhos ficam armazenados na nuvem, separados por usuário.</p><span class="coming-soon" id="syncStatus">SUPABASE CONECTADO</span></div></div>
     </section>
   </main>
 </div>
