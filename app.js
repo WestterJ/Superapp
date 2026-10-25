@@ -10,6 +10,7 @@
   ];
   const $ = id => document.getElementById(id);
   let apps = [], toastTimer, supabase, user = null, authMode = "login";
+  let loadingPromise = null, loadedUserId = null;
   const hasSupabase = Boolean(window.supabase?.createClient);
   if (hasSupabase) supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -38,7 +39,7 @@
       const rows=source.map(a=>({user_id:user.id,name:a.name,description:a.description||"",url:safeUrl(a.url)||"https://example.com",icon:a.icon||"⭐",color:a.color||"blue",active:Boolean(a.active)}));
       // Do not upload placeholder links. If local links exist, migrate only valid configured entries.
       const migratable=rows.filter(r=>r.url!=="https://example.com");
-      if(migratable.length){const {error:insertError}=await supabase.from("central_apps").insert(migratable);if(insertError)throw insertError;const {data:again,error:reloadError}=await supabase.from("central_apps").select("id,user_id,name,description,url,icon,color,active,created_at").order("created_at",{ascending:true});if(reloadError)throw reloadError;apps=(again||[]).map(a=>({id:a.id,name:a.name,description:a.description||"",url:a.url,icon:a.icon||"⭐",color:a.color||"blue",active:a.active}));}
+      if(migratable.length){const {error:insertError}=await supabase.from("central_apps").upsert(migratable,{onConflict:"user_id,url",ignoreDuplicates:true});if(insertError)throw insertError;const {data:again,error:reloadError}=await supabase.from("central_apps").select("id,user_id,name,description,url,icon,color,active,created_at").order("created_at",{ascending:true});if(reloadError)throw reloadError;apps=(again||[]).map(a=>({id:a.id,name:a.name,description:a.description||"",url:a.url,icon:a.icon||"⭐",color:a.color||"blue",active:a.active}));}
       else apps=[];
     }
     render(); $("syncStatus").textContent="SUPABASE CONECTADO · SINCRONIZADO";
@@ -46,8 +47,15 @@
   async function saveCloudApp(item,isNew) {
     const payload={user_id:user.id,name:item.name,description:item.description,url:item.url,icon:item.icon,color:item.color,active:item.active};
     const result=isNew?await supabase.from("central_apps").insert(payload).select().single():await supabase.from("central_apps").update(payload).eq("id",item.id).select().single();
-    if(result.error)throw result.error;
+    if(result.error){if(result.error.code==="23505")throw new Error("Já existe um aplicativo com este link.");throw result.error;}
     return {...item,id:result.data.id};
+  }
+  function ensureLoaded(force=false) {
+    if(!user) return Promise.resolve();
+    if(loadingPromise) return loadingPromise;
+    if(!force && loadedUserId===user.id) return Promise.resolve();
+    loadingPromise=loadCloudApps().then(()=>{loadedUserId=user.id;}).finally(()=>{loadingPromise=null;});
+    return loadingPromise;
   }
   function navigate(view) { const labels={home:"Início",manage:"Gerenciar aplicativos",settings:"Configurações"};document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===view+"View"));document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.view===view));$("pageLabel").textContent=labels[view]||"Início";$("sidebar").classList.remove("open");window.scrollTo({top:0,behavior:"smooth"}); }
   function openModal(app=null) { $("appForm").reset();$("appId").value=app?.id||"";$("modalTitle").textContent=app?"Editar aplicativo":"Adicionar aplicativo";$("appName").value=app?.name||"";$("appDescription").value=app?.description||"";$("appUrl").value=app?.url||"";$("appIcon").value=app?.icon||"⭐";$("appColor").value=app?.color||"blue";$("appActive").checked=app?Boolean(app.active):true;$("formError").classList.add("hidden");$("appModal").classList.remove("hidden");setTimeout(()=>$ ("appName").focus(),30); }
@@ -63,8 +71,13 @@
 
   async function start() {
     if(!supabase){showAuth();setAuthMessage("Não foi possível carregar a biblioteca de conexão. Verifique a internet e atualize a página.",true);return;}
-    supabase.auth.onAuthStateChange((_event,session)=>{setTimeout(async()=>{user=session?.user||null;if(!user){showAuth();return;}showApp();try{await loadCloudApps();}catch(err){showToast("Erro ao carregar do Supabase: "+(err.message||"verifique a tabela e as políticas RLS."));}},0);});
-    const {data,error}=await supabase.auth.getSession();if(error){showAuth();setAuthMessage(error.message,true);return;}user=data.session?.user||null;if(!user){showAuth();return;}showApp();try{await loadCloudApps();}catch(err){showToast("Erro ao carregar do Supabase: "+(err.message||"verifique a tabela e as políticas RLS."));}
+    // Único ponto de entrada: INITIAL_SESSION, SIGNED_IN e TOKEN_REFRESHED passam pelo mesmo controle.
+    supabase.auth.onAuthStateChange((_event,session)=>{setTimeout(async()=>{
+      user=session?.user||null;
+      if(!user){loadedUserId=null;apps=[];render();showAuth();return;}
+      showApp();
+      try{await ensureLoaded();}catch(err){showToast("Erro ao carregar do Supabase: "+(err.message||"verifique a tabela e as políticas RLS."));}
+    },0);});
   }
   setAuthMode("login");start();
 })();
